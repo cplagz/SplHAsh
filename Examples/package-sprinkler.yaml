@@ -1,0 +1,176 @@
+#
+#
+# sprinkler Controller Package
+#
+#
+
+#----------------MQTT Switches----------------
+
+
+switch:
+  - platform: mqtt
+    name: "Zone Off"
+    state_topic: "yard/sprinkler/0/status"
+    command_topic: "yard/sprinkler/0/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+  - platform: mqtt
+    name: "Zone 1"
+    state_topic: "yard/sprinkler/1/status"
+    command_topic: "yard/sprinkler/1/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+  - platform: mqtt
+    name: "Zone 2"
+    state_topic: "yard/sprinkler/2/status"
+    command_topic: "yard/sprinkler/2/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+  - platform: mqtt
+    name: "Zone 3"
+    state_topic: "yard/sprinkler/3/status"
+    command_topic: "yard/sprinkler/3/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+  - platform: mqtt
+    name: "Zone 4"
+    state_topic: "yard/sprinkler/4/status"
+    command_topic: "yard/sprinkler/4/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+  - platform: mqtt
+    name: "Zone 5"
+    state_topic: "yard/sprinkler/5/status"
+    command_topic: "yard/sprinkler/5/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+  - platform: mqtt
+    name: "Zone 6"
+    state_topic: "yard/sprinkler/6/status"
+    command_topic: "yard/sprinkler/6/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+    
+  - platform: mqtt
+    name: "Zone 7"
+    state_topic: "yard/sprinkler/7/status"
+    command_topic: "yard/sprinkler/7/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+    
+  - platform: mqtt
+    name: "Bore Pump"
+    state_topic: "yard/sprinkler/8/status"
+    command_topic: "yard/sprinkler/8/action"
+    availability_topic: "sprinkler/availability"
+    icon: mdi:sprinkler
+
+
+#----------------SCRIPTS----------------
+
+script:
+## Water All Zones
+
+  sprinkler_water_all:
+    alias: '[Sprinkler] Water All'
+    sequence:
+      - data:
+          entity_id: switch.zone_2
+        service: switch.turn_on
+      - delay: "{{ states('input_text.zone2') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+      - data:
+          entity_id: switch.zone_3
+        service: switch.turn_on
+      - delay: "{{ states('input_text.zone3') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+      - data:
+          entity_id: switch.zone_4
+        service: switch.turn_on
+      - delay: "{{ states('input_text.zone4') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+      - data:
+          entity_id: switch.zone_off
+        service: switch.turn_on
+
+## Water Front Lawn
+
+  sprinkler_water_zone2:
+    alias: '[Sprinkler] Water Front Lawn'
+    sequence:
+      - data:
+          entity_id: switch.zone_2
+        service: switch.turn_on
+      - delay: "{{ states('input_text.zone2') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+      - data:
+          entity_id: switch.zone_off
+        service: switch.turn_on
+
+## Water Gardens and Driveway
+
+  sprinkler_water_zone3:
+    alias: '[Sprinkler] Water Gardens and Driveway'
+    sequence:
+      - data:
+          entity_id: switch.zone_3
+        service: switch.turn_on
+      - delay: "{{ states('input_text.zone3') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+      - data:
+          entity_id: switch.zone_off
+        service: switch.turn_on
+
+## Water Back Lawn
+
+  sprinkler_water_zone4:
+    alias: '[Sprinkler] Water Back Lawn'
+    sequence:
+      - data:
+          entity_id: switch.zone_4
+        service: switch.turn_on
+      - delay: "{{ states('input_text.zone4') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+      - data:
+          entity_id: switch.zone_off
+        service: switch.turn_on
+
+
+#----------------AUTOMATIONS----------------
+
+
+automation:
+  - id: sprinkler_water_all
+    alias: '[Sprinkler] Water All Zones'
+    trigger:
+    - at: '05:00'
+      platform: time
+    condition:
+      condition: time
+      weekday:
+        - mon
+        - thu
+        - sat
+    action:
+    - data:
+        entity_id: script.sprinkler_water_all
+      service: script.turn_on
+
+
+#----------------TIME INPUT VALUES----------------
+
+
+# Watering Time Inputs
+input_text:
+  zone2:
+    name: Front Lawn
+    initial: '00:30'
+    pattern: '^[0-9]{1,2}:[0-9]{1,2}$'
+  zone3:
+    name: Gardens and Driveway
+    initial: '00:30'
+    pattern: '^[0-9]{1,2}:[0-9]{1,2}$'
+  zone4:
+    name: Back Lawn
+    initial: '00:30'
+    pattern: '^[0-9]{1,2}:[0-9]{1,2}$'
